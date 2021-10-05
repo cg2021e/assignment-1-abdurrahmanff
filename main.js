@@ -110,7 +110,7 @@ function main() {
       0, change, 0, 1,
     ]
 
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(0.729, 0.662, 0.470, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     //gambar kerangka kiri
