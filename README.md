@@ -9,7 +9,7 @@
 ![Left Side](/pics/right.jpeg)
 
 ## Back Side
-![Back Side](/pics/left.jpeg)
+![Back Side](/pics/back.jpeg)
 
 ## Left Side
-![Left Side](/pics/right.jpeg)
+![Left Side](/pics/left.jpeg)
