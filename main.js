@@ -140,6 +140,7 @@ function main() {
     gl.uniformMatrix4fv(uChange, false, kanan);
     gl.drawArrays(gl.TRIANGLE_FAN, 373, 20);
     gl.drawArrays(gl.TRIANGLE_FAN, 393, 18);
+    requestAnimationFrame(render);
   }
-  setInterval(render, 1000 / 60);
+  requestAnimationFrame(render);
 }
