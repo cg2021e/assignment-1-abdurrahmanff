@@ -74,7 +74,6 @@ function main() {
             gl_FragColor = vec4(phong * vColor/255.0, 1.);
         }
     `;
-
     // Create .c in GPU
     var vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderSource);
@@ -150,7 +149,7 @@ function main() {
 
     // Set the view matrix in the vertex shader
     var view = glMatrix.mat4.create();
-    var camera = [0, 0, 3];
+    var camera = [0, 0, 6.5];
     glMatrix.mat4.lookAt(
         view,
         camera,      // camera position
@@ -162,8 +161,8 @@ function main() {
     // Define the lighting and shading
     var uLightConstant = gl.getUniformLocation(shaderProgram, "uLightConstant");
     var uAmbientIntensity = gl.getUniformLocation(shaderProgram, "uAmbientIntensity");
-    gl.uniform3fv(uLightConstant, [1.0, 1.0, 1.0]);   // orange light
-    gl.uniform1f(uAmbientIntensity, 0.4) // light intensity: 40%
+    gl.uniform3fv(uLightConstant, [1.0, 0.5, 1.0]);   // orange light
+    gl.uniform1f(uAmbientIntensity, 1) // light intensity: 40%
     // var uLightDirection = gl.getUniformLocation(shaderProgram, "uLightDirection");
     // gl.uniform3fv(uLightDirection, [2.0, 0.0, 0.0]);    // light comes from the right side
     var uLightPosition = gl.getUniformLocation(shaderProgram, "uLightPosition");
@@ -172,68 +171,12 @@ function main() {
     var uViewerPosition = gl.getUniformLocation(shaderProgram, "uViewerPosition");
     gl.uniform3fv(uViewerPosition, camera);
 
+    var freeze = false;
     // Apply some interaction using mouse
-    var lastPointOnTrackBall, currentPointOnTrackBall;
-    var lastQuat = glMatrix.quat.create();
-    function computeCurrentQuat() {
-        // Secara berkala hitung quaternion rotasi setiap ada perubahan posisi titik pointer mouse
-        var axisFromCrossProduct = glMatrix.vec3.cross(glMatrix.vec3.create(), lastPointOnTrackBall, currentPointOnTrackBall);
-        var angleFromDotProduct = Math.acos(glMatrix.vec3.dot(lastPointOnTrackBall, currentPointOnTrackBall));
-        var rotationQuat = glMatrix.quat.setAxisAngle(glMatrix.quat.create(), axisFromCrossProduct, angleFromDotProduct);
-        glMatrix.quat.normalize(rotationQuat, rotationQuat);
-        return glMatrix.quat.multiply(glMatrix.quat.create(), rotationQuat, lastQuat);
+    function onMouseClick(event) {
+        freeze = !freeze;
     }
-    // Memproyeksikan pointer mouse agar jatuh ke permukaan ke virtual trackball
-    function getProjectionPointOnSurface(point) {
-        var radius = canvas.width / 3;  // Jari-jari virtual trackball kita tentukan sebesar 1/3 lebar kanvas
-        var center = glMatrix.vec3.fromValues(canvas.width / 2, canvas.height / 2, 0);  // Titik tengah virtual trackball
-        var pointVector = glMatrix.vec3.subtract(glMatrix.vec3.create(), point, center);
-        pointVector[1] = pointVector[1] * (-1); // Flip nilai y, karena koordinat piksel makin ke bawah makin besar
-        var radius2 = radius * radius;
-        var length2 = pointVector[0] * pointVector[0] + pointVector[1] * pointVector[1];
-        if (length2 <= radius2) pointVector[2] = Math.sqrt(radius2 - length2); // Dapatkan nilai z melalui rumus Pytagoras
-        else {  // Atur nilai z sebagai 0, lalu x dan y sebagai paduan Pytagoras yang membentuk sisi miring sepanjang radius
-            pointVector[0] *= radius / Math.sqrt(length2);
-            pointVector[1] *= radius / Math.sqrt(length2);
-            pointVector[2] = 0;
-        }
-        return glMatrix.vec3.normalize(glMatrix.vec3.create(), pointVector);
-    }
-
-    var dragging, rotation = glMatrix.mat4.create();
-    function onMouseDown(event) {
-        var x = event.clientX;
-        var y = event.clientY;
-        var rect = event.target.getBoundingClientRect();
-        if (
-            rect.left <= x &&
-            rect.right >= x &&
-            rect.top <= y &&
-            rect.bottom >= y
-        ) {
-            dragging = true;
-        }
-        lastPointOnTrackBall = getProjectionPointOnSurface(glMatrix.vec3.fromValues(x, y, 0));
-        currentPointOnTrackBall = lastPointOnTrackBall;
-    }
-    function onMouseUp(event) {
-        dragging = false;
-        if (currentPointOnTrackBall != lastPointOnTrackBall) {
-            lastQuat = computeCurrentQuat();
-        }
-    }
-    function onMouseMove(event) {
-        if (dragging) {
-            var x = event.clientX;
-            var y = event.clientY;
-            currentPointOnTrackBall = getProjectionPointOnSurface(glMatrix.vec3.fromValues(x, y, 0));
-            glMatrix.mat4.fromQuat(rotation, computeCurrentQuat());
-        }
-    }
-    document.addEventListener("mousedown", onMouseDown, false);
-    document.addEventListener("mouseup", onMouseUp, false);
-    document.addEventListener("mousemove", onMouseMove, false);
-
+    document.addEventListener("click", onMouseClick, false);
     // Apply some interaction using keyboard
     function onKeydown(event) {
         if (event.keyCode == 32) freeze = true;
@@ -245,19 +188,43 @@ function main() {
     document.addEventListener("keyup", onKeyup, false);
 
     function render() {
-        // Init the model matrix
-        var model = glMatrix.mat4.create();
-        glMatrix.mat4.multiply(model, model, rotation);
-        gl.uniformMatrix4fv(uModel, false, model);
-        // Set the model matrix for normal vector
-        var normalModel = glMatrix.mat3.create();
-        glMatrix.mat3.normalFromMat4(normalModel, model);
-        gl.uniformMatrix3fv(uNormalModel, false, normalModel);
-        // Reset the frame buffer
-        gl.enable(gl.DEPTH_TEST);
-        gl.clearColor(0, 0.92156, 0.92156, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        if (!freeze) { // If it is not freezing, then animate the rectangle
+            // Init the model matrix
+            var model = glMatrix.mat4.create();
+            // Define a rotation matrix about x axis and store it to the model matrix
+            glMatrix.mat4.rotate(model, model, -1.3, [1, 0, 0]);
+            // Define a rotation matrix about y axis and store it to the model matrix
+            glMatrix.mat4.rotate(model, model, 0, [0, 1, 0]);
+            glMatrix.mat4.rotate(model, model, 1.6, [0, 0, 1]);
+            // Define a translation matrix and store it to the model matrix
+            glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
+            // Set the model matrix in the vertex shader
+            gl.uniformMatrix4fv(uModel, false, model);
+            // Set the model matrix for normal vector
+            var normalModel = glMatrix.mat3.create();
+            glMatrix.mat3.normalFromMat4(normalModel, model);
+            gl.uniformMatrix3fv(uNormalModel, false, normalModel);
+            // Reset the frame buffer
+            gl.enable(gl.DEPTH_TEST);
+            gl.clearColor(0, 0.92156, 0.92156, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+            model = glMatrix.mat4.create();
+            // Define a rotation matrix about x axis and store it to the model matrix
+            glMatrix.mat4.rotate(model, model, -1.4, [1, 0, 0]);
+            // Define a rotation matrix about y axis and store it to the model matrix
+            glMatrix.mat4.rotate(model, model, 0, [0, 1, 0]);
+            glMatrix.mat4.rotate(model, model, -1.8, [0, 0, 1]);
+            // Define a translation matrix and store it to the model matrix
+            glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
+            // Set the model matrix in the vertex shader
+            gl.uniformMatrix4fv(uModel, false, model);
+            normalModel = glMatrix.mat3.create();
+            glMatrix.mat3.normalFromMat4(normalModel, model);
+            gl.uniformMatrix3fv(uNormalModel, false, normalModel);
+            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        }
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
