@@ -218,11 +218,11 @@ function main() {
         uLightConstant = gl.getUniformLocation(shaderProgram, "uLightConstant");
         uAmbientIntensity = gl.getUniformLocation(shaderProgram, "uAmbientIntensity");
         gl.uniform3fv(uLightConstant, [1.0, 1, 1.0]);   // orange light
-        gl.uniform1f(uAmbientIntensity, 4) // light intensity: 40%
+        gl.uniform1f(uAmbientIntensity, 1) // light intensity: 40%
         // var uLightDirection = gl.getUniformLocation(shaderProgram, "uLightDirection");
         // gl.uniform3fv(uLightDirection, [2.0, 0.0, 0.0]);    // light comes from the right side
         uLightPosition = gl.getUniformLocation(shaderProgram, "uLightPosition");
-        gl.uniform3fv(uLightPosition, [1.0, 1.0, 1.0]);
+        // gl.uniform3fv(uLightPosition, [1.0, 1.0, 1.0]);
         uNormalModel = gl.getUniformLocation(shaderProgram, "uNormalModel");
         uViewerPosition = gl.getUniformLocation(shaderProgram, "uViewerPosition");
         gl.uniform3fv(uViewerPosition, camera);
@@ -236,9 +236,8 @@ function main() {
 
         cube();
         var model = glMatrix.mat4.create();
-        // Set the model matrix in the vertex shader
-        glMatrix.mat4.scale(model, model, [0.5, 0.5, 0.5]);
-        glMatrix.mat4.translate(model, model, [0, 3, 0])
+        glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
+        glMatrix.mat4.scale(model, model, [0.4, 0.4, 0.4]);
         gl.uniformMatrix4fv(uModel, false, model);
         var pos = glMatrix.vec3.create();
         pos = glMatrix.mat4.getTranslation(pos, model);
@@ -259,11 +258,11 @@ function main() {
         glMatrix.mat4.rotate(model, model, 1.6, [0, 0, 1]);
         // Define a translation matrix and store it to the model matrix
         glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
-        var pos = glMatrix.vec3.create();
-        pos = glMatrix.mat4.getTranslation(pos, model);
-        gl.uniform3fv(uLightConstant, [1, 1, 1]);
-        gl.uniform1f(uAmbientIntensity, 0.431);
-        gl.uniform3fv(uLightPosition, pos);
+        // var pos = glMatrix.vec3.create();
+        // pos = glMatrix.mat4.getTranslation(pos, model);
+        // gl.uniform3fv(uLightConstant, [1, 1, 1]);
+        // gl.uniform1f(uAmbientIntensity, 0.431);
+        // gl.uniform3fv(uLightPosition, pos);
         // Set the model matrix in the vertex shader
         gl.uniformMatrix4fv(uModel, false, model);
         // Set the model matrix for normal vector
@@ -280,11 +279,11 @@ function main() {
         glMatrix.mat4.rotate(model, model, -1.8, [0, 0, 1]);
         // Define a translation matrix and store it to the model matrix
         glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
-        var pos = glMatrix.vec3.create();
-        pos = glMatrix.mat4.getTranslation(pos, model);
-        gl.uniform3fv(uLightConstant, [1, 1, 1]);
-        gl.uniform1f(uAmbientIntensity, 0.431);
-        gl.uniform3fv(uLightPosition, pos);
+        // var pos = glMatrix.vec3.create();
+        // pos = glMatrix.mat4.getTranslation(pos, model);
+        // gl.uniform3fv(uLightConstant, [1, 1, 1]);
+        // gl.uniform1f(uAmbientIntensity, 0.431);
+        // gl.uniform3fv(uLightPosition, pos);
         // Set the model matrix in the vertex shader
         gl.uniformMatrix4fv(uModel, false, model);
         normalModel = glMatrix.mat3.create();
@@ -294,8 +293,8 @@ function main() {
 
         plane();
         model = glMatrix.mat4.create();
-        glMatrix.mat4.scale(model, model, [20, 20, 1])
-        glMatrix.mat4.rotate(model, model, -0.55, [1, 0, 0]);
+        glMatrix.mat4.scale(model, model, [20, 20, 1]);
+        glMatrix.mat4.rotate(model, model, -0.54, [1, 0, 0]);
         glMatrix.mat4.translate(model, model, [0, 0, -1]);
         gl.uniformMatrix4fv(uModel, false, model);
         // Set the model matrix in the vertex shader
