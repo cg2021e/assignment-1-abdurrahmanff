@@ -171,60 +171,42 @@ function main() {
     var uViewerPosition = gl.getUniformLocation(shaderProgram, "uViewerPosition");
     gl.uniform3fv(uViewerPosition, camera);
 
-    var freeze = false;
-    // Apply some interaction using mouse
-    function onMouseClick(event) {
-        freeze = !freeze;
-    }
-    document.addEventListener("click", onMouseClick, false);
-    // Apply some interaction using keyboard
-    function onKeydown(event) {
-        if (event.keyCode == 32) freeze = true;
-    }
-    function onKeyup(event) {
-        if (event.keyCode == 32) freeze = false;
-    }
-    document.addEventListener("keydown", onKeydown, false);
-    document.addEventListener("keyup", onKeyup, false);
-
     function render() {
-        if (!freeze) { // If it is not freezing, then animate the rectangle
-            // Init the model matrix
-            var model = glMatrix.mat4.create();
-            // Define a rotation matrix about x axis and store it to the model matrix
-            glMatrix.mat4.rotate(model, model, -1.3, [1, 0, 0]);
-            // Define a rotation matrix about y axis and store it to the model matrix
-            glMatrix.mat4.rotate(model, model, 0, [0, 1, 0]);
-            glMatrix.mat4.rotate(model, model, 1.6, [0, 0, 1]);
-            // Define a translation matrix and store it to the model matrix
-            glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
-            // Set the model matrix in the vertex shader
-            gl.uniformMatrix4fv(uModel, false, model);
-            // Set the model matrix for normal vector
-            var normalModel = glMatrix.mat3.create();
-            glMatrix.mat3.normalFromMat4(normalModel, model);
-            gl.uniformMatrix3fv(uNormalModel, false, normalModel);
-            // Reset the frame buffer
-            gl.enable(gl.DEPTH_TEST);
-            gl.clearColor(0, 0.92156, 0.92156, 1.0);
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        // Init the model matrix
+        var model = glMatrix.mat4.create();
+        // Define a rotation matrix about x axis and store it to the model matrix
+        glMatrix.mat4.rotate(model, model, -1.3, [1, 0, 0]);
+        // Define a rotation matrix about y axis and store it to the model matrix
+        glMatrix.mat4.rotate(model, model, 0, [0, 1, 0]);
+        glMatrix.mat4.rotate(model, model, 1.6, [0, 0, 1]);
+        // Define a translation matrix and store it to the model matrix
+        glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
+        // Set the model matrix in the vertex shader
+        gl.uniformMatrix4fv(uModel, false, model);
+        // Set the model matrix for normal vector
+        var normalModel = glMatrix.mat3.create();
+        glMatrix.mat3.normalFromMat4(normalModel, model);
+        gl.uniformMatrix3fv(uNormalModel, false, normalModel);
+        // Reset the frame buffer
+        gl.enable(gl.DEPTH_TEST);
+        gl.clearColor(0, 0.92156, 0.92156, 1.0);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
-            model = glMatrix.mat4.create();
-            // Define a rotation matrix about x axis and store it to the model matrix
-            glMatrix.mat4.rotate(model, model, -1.4, [1, 0, 0]);
-            // Define a rotation matrix about y axis and store it to the model matrix
-            glMatrix.mat4.rotate(model, model, 0, [0, 1, 0]);
-            glMatrix.mat4.rotate(model, model, -1.8, [0, 0, 1]);
-            // Define a translation matrix and store it to the model matrix
-            glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
-            // Set the model matrix in the vertex shader
-            gl.uniformMatrix4fv(uModel, false, model);
-            normalModel = glMatrix.mat3.create();
-            glMatrix.mat3.normalFromMat4(normalModel, model);
-            gl.uniformMatrix3fv(uNormalModel, false, normalModel);
-            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-        }
+        model = glMatrix.mat4.create();
+        // Define a rotation matrix about x axis and store it to the model matrix
+        glMatrix.mat4.rotate(model, model, -1.4, [1, 0, 0]);
+        // Define a rotation matrix about y axis and store it to the model matrix
+        glMatrix.mat4.rotate(model, model, 0, [0, 1, 0]);
+        glMatrix.mat4.rotate(model, model, -1.8, [0, 0, 1]);
+        // Define a translation matrix and store it to the model matrix
+        glMatrix.mat4.translate(model, model, [0, 1.7, 0]);
+        // Set the model matrix in the vertex shader
+        gl.uniformMatrix4fv(uModel, false, model);
+        normalModel = glMatrix.mat3.create();
+        glMatrix.mat3.normalFromMat4(normalModel, model);
+        gl.uniformMatrix3fv(uNormalModel, false, normalModel);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
